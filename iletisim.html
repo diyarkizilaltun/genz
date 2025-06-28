@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İletişim | GenZ</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background: #f8f6f3; color: #222; font-family: 'Montserrat', Arial, sans-serif; }
+        .contact-container { max-width: 600px; margin: 48px auto; background: #fff; border-radius: 18px; box-shadow: 0 4px 24px #e0c68d22; padding: 36px 28px; }
+        h1 { color: #e0c68d; font-size: 2rem; margin-bottom: 18px; }
+        .contact-info { margin-bottom: 18px; }
+        .contact-info p { margin: 8px 0; }
+        .contact-form label { display: block; margin: 12px 0 4px 0; font-weight: 600; }
+        .contact-form input, .contact-form textarea { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #e0c68d; margin-bottom: 12px; }
+        .contact-form button { background: #e0c68d; color: #fff; border: none; border-radius: 8px; padding: 10px 28px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+        .contact-form button:hover { background: #bfae7e; }
+
+        @media (max-width: 600px) {
+            .contact-container {
+                padding: 14px 4vw;
+                margin: 12px 0;
+                border-radius: 10px;
+            }
+            h1 {
+                font-size: 1.2rem;
+                margin-bottom: 10px;
+            }
+            .contact-info p, label, input, textarea, button {
+                font-size: 0.98rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="contact-container">
+        <h1>İletişim</h1>
+        <div class="contact-info">
+            <p>Her türlü soru, öneri ve destek talepleriniz için bizimle iletişime geçebilirsiniz.</p>
+            <p><b>E-posta:</b> destek@genz.com</p>
+            <p><b>Telefon:</b> 0 (555) 123 45 67</p>
+            <p><b>Adres:</b> GenZ E-Ticaret, İstanbul, Türkiye</p>
+        </div>
+        <form class="contact-form">
+            <label for="name">Adınız Soyadınız</label>
+            <input type="text" id="name" required>
+            <label for="email">E-posta</label>
+            <input type="email" id="email" required>
+            <label for="message">Mesajınız</label>
+            <textarea id="message" rows="4" required></textarea>
+            <button type="submit">Gönder</button>
+        </form>
+    </div>
+</body>
+</html>

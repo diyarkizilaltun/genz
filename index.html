@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GenZ</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E%F0%9F%92%8D%3C/text%3E%3C/svg%3E">
+    
+    <style>
+        .navbar {
+            height: 56px;
+            min-height: 56px;
+            z-index: 1100;
+            position: relative;
+        }
+        .logo {
+            font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+            font-weight: 900;
+            font-size: 2.2rem;
+            letter-spacing: 3px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #e0c68d;
+            background: linear-gradient(90deg, #e0c68d 0%, #bfae7e 50%, #e0c68d 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 16px rgba(224,198,141,0.13), 0 1px 0 #fff;
+            padding: 0 16px 0 0;
+            border-radius: 12px;
+            transition: 
+                transform 0.25s cubic-bezier(.4,2,.6,1),
+                background-position 0.7s cubic-bezier(.4,2,.6,1);
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+        .logo::before {
+            content: "★";
+            font-size: 1.3rem;
+            color: #bfae7e;
+            margin-right: 6px;
+            filter: drop-shadow(0 1px 2px #e0c68d88);
+            transition: color 0.3s;
+        }
+        .logo:hover {
+            transform: scale(1.09) rotate(-2deg);
+            background-position: right center;
+            box-shadow: 0 2px 16px 0 #e0c68d44;
+        }
+        .logo:hover::before {
+            color: #e0c68d;
+            text-shadow: 0 0 8px #bfae7e;
+        }
+        /* Sepet slide-in panel tasarımı */
+        #cart-modal {
+            position: fixed;
+            top: 56px;
+            right: 0;
+            width: 350px;
+            height: calc(100% - 56px);
+            background: #fff;
+            box-shadow: -2px 0 16px rgba(224,198,141,0.15);
+            z-index: 1200;
+            transition: transform 0.3s ease;
+            transform: translateX(100%);
+            border-radius: 8px 0 0 8px;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        #cart-modal.active {
+            transform: translateX(0);
+            visibility: visible;
+            pointer-events: auto;
+        }
+        #cart-modal .modal-content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 24px 18px 18px 18px;
+            box-sizing: border-box;
+        }
+        #cart-modal .close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 28px;
+    color: #e0c68d; /* ← EKLENDİ */
+    cursor: pointer;
+    font-weight: bold;
+    z-index: 10;
+    background: none;
+    border: none;
+    transition: color 0.2s ease;
+}
+
+#cart-modal .close:hover {
+    color: #bfae7e;
+}
+        #cart-items {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 24px;
+        }
+        #cart-total {
+            margin-top: 16px;
+            font-size: 18px;
+            text-align: right;
+        }
+        .remove-cart-item-btn {
+            background: #e57373;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 2px 10px;
+            cursor: pointer;
+        }
+        .product-card {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px 0 rgba(224,198,141,0.10), 0 1.5px 8px 0 rgba(224,198,141,0.06);
+            padding: 18px 16px 16px 16px;
+            margin: 18px 12px;
+            width: 260px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: box-shadow 0.2s, transform 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .product-card:hover {
+            box-shadow: 0 8px 32px 0 #e0c68d33, 0 2px 12px 0 #e0c68d44;
+            transform: translateY(-4px) scale(1.03);
+        }
+        .product-card img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 14px;
+            box-shadow: 0 2px 12px #e0c68d44;
+            border: 3px solid #f5f3ef;
+            background: #f8f6f3;
+        }
+        .product-card h2 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #e0c68d;
+            margin: 0 0 6px 0;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        .product-card p {
+            font-size: 1rem;
+            color: #7c6c5c;
+            margin: 0 0 12px 0;
+            font-weight: 500;
+        }
+        .add-to-cart-btn {
+            background: linear-gradient(90deg, #e0c68d 60%, #bfae7e 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 22px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #e0c68d44;
+            transition: background 0.2s, transform 0.15s;
+        }
+        .add-to-cart-btn:hover {
+            background: linear-gradient(90deg, #bfae7e 20%, #e0c68d 100%);
+            transform: scale(1.06);
+        }
+        #product-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            align-items: stretch;
+            gap: 8px;
+            min-height: 400px;
+        }
+        .search-bar {
+            width: 100%;
+            max-width: 320px;
+            margin: 18px auto 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 7px 14px;
+            border-radius: 18px;
+            border: 1.2px solid #e0c68d;
+            font-size: 1rem;
+            outline: none;
+            background: #f8f6f3;
+            color: #7c6c5c;
+            box-shadow: 0 1px 4px #e0c68d22;
+            transition: border 0.2s, box-shadow 0.2s;
+            height: 36px;
+            margin: 0;
+        }
+        .search-bar input:focus {
+            border: 1.5px solid #e0c68d;
+            box-shadow: 0 2px 8px #e0c68d44;
+            background: #fff;
+        }
+        .search-btn {
+            border-radius: 0 18px 18px 0;
+            border: 1.2px solid #e0c68d;
+            border-left: none;
+            background: #e0c68d;
+            color: #fff;
+            font-size: 1.1rem;
+            padding: 0 16px;
+            height: 36px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            margin: 0;
+        }
+        .search-btn:hover {
+            background: #bfae7e;
+        }
+        /* Ürün detay modalı */
+        #product-detail-modal {
+            display: none;
+            position: fixed;
+            z-index: 1300;
+            left: 0; top: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.25);
+        }
+        #product-detail-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #product-detail-modal .modal-content {
+            background: #fff;
+            border-radius: 16px;
+            padding: 32px 24px;
+            max-width: 400px;
+            width: 90vw;
+            box-shadow: 0 8px 32px #e0c68d33;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #product-detail-modal .close {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: 28px;
+            cursor: pointer;
+        }
+        /* Toast notification */
+        #toast {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #e0c68d;
+            color: #fff;
+            padding: 12px 32px;
+            border-radius: 24px;
+            font-size: 1rem;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 2000;
+            transition: opacity 0.3s;
+        }
+        #toast.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .checkout-btn {
+            background: linear-gradient(90deg, #e0c68d 60%, #bfae7e 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 28px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 18px;
+            box-shadow: 0 2px 8px #e0c68d44;
+            transition: background 0.2s, transform 0.15s;
+        }
+        .checkout-btn:hover {
+            background: linear-gradient(90deg, #bfae7e 20%, #e0c68d 100%);
+            transform: scale(1.04);
+        }
+        @media (max-width: 900px) {
+            #product-list {
+                justify-content: center;
+            }
+            .product-card {
+                margin: 14px 6px;
+                width: 90vw;
+                max-width: 320px;
+            }
+        }
+        @media (max-width: 600px) {
+            .navbar { height: 44px; min-height: 44px; }
+            .logo { font-size: 1.2rem; padding: 0 6px; }
+            .container, .sidebar, main { padding: 0 !important; }
+            .featured-grid, .product-card, .about-inner, .privacy-container, .return-container, .contact-container {
+                max-width: 98vw !important;
+                padding: 10px 2vw !important;
+                margin: 10px 0 !important;
+                border-radius: 10px !important;
+            }
+            h1, h2 { font-size: 1.1rem !important; }
+            p, li, .about-text p, .about-highlight { font-size: 0.98rem !important; }
+        }
+        @media (max-width: 500px) {
+            .navbar {
+                height: 48px;
+                min-height: 48px;
+            }
+            #cart-modal {
+                width: 100%;
+                right: 0;
+                top: 48px;
+                height: calc(100% - 48px);
+                border-radius: 0;
+            }
+        }
+        /* Hakkımızda kutusu stilleri */
+        .about-fadein {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 1px;
+            margin: 0 auto;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.9s cubic-bezier(.4,2,.6,1), transform 0.9s cubic-bezier(.4,2,.6,1);
+            will-change: opacity, transform;
+        }
+        .about-fadein.visible {
+            opacity: 1;
+            transform: none;
+        }
+        .about-inner {
+            background: rgba(255,255,255,0.92);
+            box-shadow: 0 4px 32px 0 #e0c68d33, 0 2px 12px 0 #e0c68d22;
+            border-radius: 22px;
+            padding: 36px 38px 28px 38px;
+            max-width: 700px;
+            width: 95vw;
+            margin: 0 auto;
+        }
+        .about-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+            gap: 12px;
+        }
+        .about-icon {
+            font-size: 2.2rem;
+            color: #e0c68d;
+            filter: drop-shadow(0 2px 8px #e0c68d44);
+            vertical-align: middle;
+        }
+        .about-title {
+            font-size: 2.1rem;
+            font-weight: 900;
+            color: #bfae7e;
+            letter-spacing: 2px;
+            font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+        }
+        .about-text p {
+            color: #7c6c5c;
+            font-size: 1.13rem;
+            line-height: 1.85;
+            margin: 0 0 16px 0;
+            font-weight: 500;
+            text-align: center;
+        }
+        .about-highlight {
+            color: #bfae7e;
+            font-weight: 700;
+            font-size: 1.13rem;
+            margin-top: 10px;
+        }
+        @media (max-width: 700px) {
+            .about-inner {
+                padding: 22px 8vw 18px 8vw;
+            }
+            .about-title {
+                font-size: 1.4rem;
+            }
+            .about-icon {
+                font-size: 1.4rem;
+            }
+            .about-text p, .about-highlight {
+                font-size: 1rem;
+            }
+        }
+        @media (max-width: 500px) {
+            .about-inner {
+                padding: 16px 2vw 12px 2vw;
+            }
+            .about-title {
+                font-size: 1.1rem;
+            }
+            .about-icon {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="navbar-left">
+                <span class="logo">
+                    <span class="logo-star">✧</span>
+                    <span class="logo-text">GenZ</span>
+                    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
+                    <span class="logo-subtitle" style="font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 1.2rem; color: #bfae7e; margin-left: 8px;"></span>
+                </span>
+            </div>
+            <div class="navbar-right user-actions" id="navbar-right">
+                <a href="#" id="signup-link">Üye Ol</a>
+                <a href="#" id="login-link">Giriş Yap</a>
+                <!-- Kullanıcı menüsü -->
+                <div id="user-menu" style="display:none;">
+                    <button id="user-menu-btn">
+                        <span style="width:22px;height:22px;display:inline-block;vertical-align:middle;">
+                            <svg width="22" height="22" viewBox="0 0 22 22" fill="#e0c68d" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="11" cy="8" r="5" />
+                                <ellipse cx="11" cy="17" rx="7" ry="4" />
+                            </svg>
+                        </span>
+                        <span id="user-name"></span>
+                        <span style="font-size:1.1rem;">▼</span>
+                    </button>
+                    <div id="user-dropdown">
+                        <a href="#" id="profile-link">Profilim</a>
+                        <a href="#" id="favorites-link">Favoriler</a>
+                        <a href="#" id="cart-link-dropdown">Sepetim</a>
+                        <a href="#" id="admin-link" style="display:none;">Admin Paneli</a>
+                        <button id="logout-btn">Çıkış</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <!-- Kampanya/banner alanı -->
+    <div id="banner-area" class="promo-banner" style="width:100%;background:linear-gradient(90deg,#bfae7e 0,#e0c68d 100%);color:#fff;text-align:center;padding:10px 0;font-size:1.1rem;font-weight:600;letter-spacing:1px;">
+        Yaz İndirimi! Sepette %20 indirim kodu: <b>GENZYAZ</b>
+    </div>
+    <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Ürün ara...">
+    </div>
+    <div class="container">
+        <aside class="sidebar">
+            <ul class="categories category-list">
+                <li>
+                    <a href="#" id="all-products-link">Tüm Ürünler</a>
+                </li>
+                <li>
+                    <a href="#" id="taki-link">Takı</a>
+                </li>
+                <li><a href="#">Piercing</a></li>
+                <li><a href="#">Nail Art</a></li>
+                <li><a href="#">Saç & Stil Aksesuarları</a></li>
+            </ul>
+        </aside>
+        <main>
+            <div id="taki-submenu" style="display:none; margin-bottom:18px; text-align:center;">
+                <button class="taki-btn" data-category="Küpeler">Küpeler</button>
+                <button class="taki-btn" data-category="Kolyeler">Kolyeler</button>
+                <button class="taki-btn" data-category="Yüzükler">Yüzükler</button>
+                <button class="taki-btn" data-category="Bileklikler">Bileklikler</button>
+            </div>
+            <div id="featured-products" style="margin-bottom:32px;">
+                <h2 class="section-title" style="color:#e0c68d;text-align:center;font-size:2.1rem;margin-bottom:28px;letter-spacing:1px;">Öne Çıkan Ürünler</h2>
+                <div class="featured-grid" id="featured-grid">
+                    <!-- Dinamik olarak öne çıkan ürünler buraya eklenecek -->
+                </div>
+                <style>
+                    .featured-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+                        gap: 32px;
+                        width: 100%;
+                        max-width: 1300px;
+                        margin: 0 auto;
+                    }
+                    .featured-card {
+                        background: #fff;
+                        border-radius: 28px;
+                        box-shadow: 0 8px 32px 0 #e0c68d33, 0 2px 12px 0 #e0c68d22;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        overflow: hidden;
+                        transition: box-shadow 0.25s, transform 0.18s;
+                        min-height: 420px;
+                        position: relative;
+                    }
+                    .featured-card:hover {
+                        box-shadow: 0 12px 48px 0 #e0c68d55, 0 4px 18px 0 #e0c68d33;
+                        transform: translateY(-6px) scale(1.03);
+                    }
+                    .featured-card img {
+                        width: 100%;
+                        height: 260px;
+                        object-fit: cover;
+                        border-radius: 0 0 18px 18px;
+                        box-shadow: 0 2px 12px #e0c68d44;
+                        background: #f8f6f3;
+                    }
+                    .featured-info {
+                        padding: 28px 22px 22px 22px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        width: 100%;
+                    }
+                    .featured-info h3 {
+                        color: #e0c68d;
+                        font-size: 1.35rem;
+                        font-weight: 800;
+                        margin-bottom: 10px;
+                        letter-spacing: 1px;
+                        text-align: center;
+                    }
+                    .featured-info p {
+                        color: #7c6c5c;
+                        font-size: 1.08rem;
+                        line-height: 1.7;
+                        margin-bottom: 18px;
+                        text-align: center;
+                    }
+                    @media (max-width: 900px) {
+                        .featured-grid {
+                            grid-template-columns: 1fr;
+                        }
+                        .featured-card img {
+                            height: 180px;
+                        }
+                    }
+                    @media (max-width: 600px) {
+                        .navbar { height: 44px; min-height: 44px; }
+                        .logo { font-size: 1.2rem; padding: 0 6px; }
+                        .container, .sidebar, main { padding: 0 !important; }
+                        .featured-grid, .product-card, .about-inner, .privacy-container, .return-container, .contact-container {
+                            max-width: 98vw !important;
+                            padding: 10px 2vw !important;
+                            margin: 10px 0 !important;
+                            border-radius: 10px !important;
+                        }
+                        h1, h2 { font-size: 1.1rem !important; }
+                        p, li, .about-text p, .about-highlight { font-size: 0.98rem !important; }
+                    }
+                </style>
+            </div>
+            <div id="product-list">
+                <!-- Ürünler burada listelenecek -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Favoriler Modalı -->
+    <div id="favorites-modal" class="modal">
+        <div class="modal-content" style="max-width:420px;">
+            <span class="close" id="close-favorites">&times;</span>
+            <h2>Favorilerim</h2>
+            <div id="favorites-list"></div>
+        </div>
+    </div>
+
+    <!-- Profil Modalı -->
+    <div id="profile-modal" class="modal">
+        <div class="modal-content" style="max-width:420px;">
+            <span class="close" id="close-profile" style="color:#e0c68d;">&times;</span>
+            <h2 style="color:#e0c68d;">Profilim</h2>
+            <div id="profile-info"></div>
+            <h3 style="margin-top:18px;color:#e0c68d;">Sipariş Geçmişi</h3>
+            <div id="order-history"></div>
+        </div>
+    </div>
+
+    <!-- Admin Panel Modalı -->
+    <div id="admin-modal" class="modal">
+        <div class="modal-content" style="max-width:420px;">
+            <span class="close" id="close-admin">&times;</span>
+            <h2>Admin Paneli</h2>
+            <div id="admin-panel"></div>
+        </div>
+    </div>
+
+    <!-- Ürün Detay Modalı -->
+    <div id="product-detail-modal">
+        <div class="modal-content">
+            <span class="close" id="close-product-detail" style="color:#e0c68d;">&times;</span>
+            <img id="detail-image" src="" alt="" style="width:140px;height:140px;border-radius:50%;margin-bottom:16px;">
+            <h2 id="detail-name"></h2>
+            <p id="detail-category" style="color:#e0c68d;font-weight:600;"></p>
+            <p id="detail-price"></p>
+            <div id="detail-stock" style="margin-bottom:8px;"></div>
+            <p id="detail-desc" style="margin-top:12px;color:#bfae7e;">Açıklama: <span id="detail-description"></span></p>
+            <div id="detail-rating" style="margin:10px 0;"></div>
+            <div id="detail-comments"></div>
+            <form id="comment-form" style="margin-top:10px;">
+                <input type="text" id="comment-input" placeholder="Yorumunuz..." style="width:70%;border-radius:6px;border:1px solid #e0c68d;padding:4px 8px;">
+                <select id="rating-input" style="border-radius:6px;border:1px solid #e0c68d;padding:4px 8px;">
+                    <option value="5">5★</option>
+                    <option value="4">4★</option>
+                    <option value="3">3★</option>
+                    <option value="2">2★</option>
+                    <option value="1">1★</option>
+                </select>
+                <button type="submit" style="border-radius:6px;background:#e0c68d;color:#fff;border:none;padding:4px 12px;cursor:pointer;">Gönder</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sepet Modalı -->
+  <div id="cart-modal">
+  <div class="modal-content">
+    <span class="cart-close">&times;</span> <!-- Yeni class adı -->
+    <h2>Sepetim</h2>
+    <div id="cart-items"></div>
+    <div id="cart-total"></div>
+  </div>
+</div>
+
+    <!-- Giriş Yap Modalı -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-login">&times;</span>
+            <h2>Giriş Yap</h2>
+            <form id="login-form">
+                <input type="email" placeholder="E-posta" required>
+                <input type="password" placeholder="Şifre" required>
+                <button type="submit">Giriş Yap</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Üye Ol Modalı -->
+    <div id="signup-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-signup">&times;</span>
+            <h2>Üye Ol</h2>
+            <form id="signup-form">
+                <input type="text" placeholder="Ad Soyad" required>
+                <input type="email" placeholder="E-posta" required>
+                <input type="password" placeholder="Şifre" required>
+                <button type="submit">Üye Ol</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast"></div>
+
+    <footer style="background: #222; color: #fff; padding: 40px 0 32px 0; text-align: center; position: relative;">
+        <nav style="margin-bottom: 18px;">
+            <a href="index.html" style="color:#e0c68d; text-decoration:none; margin:0 18px; font-weight:600; font-size:1.08rem; transition:color 0.2s;">Ana Sayfa</a>
+            <a href="#product-list" style="color:#e0c68d; text-decoration:none; margin:0 18px; font-weight:600; font-size:1.08rem; transition:color 0.2s;">Ürünler</a>
+            <a href="iletisim.html" style="color:#e0c68d; text-decoration:none; margin:0 18px; font-weight:600; font-size:1.08rem; transition:color 0.2s;">İletişim</a>
+            <a href="gizlilik.html" style="color:#e0c68d; text-decoration:none; margin:0 18px; font-weight:600; font-size:1.08rem; transition:color 0.2s;">Gizlilik Politikası</a>
+            <a href="iade-degisim.html" style="color:#e0c68d; text-decoration:none; margin:0 18px; font-weight:600; font-size:1.08rem; transition:color 0.2s;">İade ve Değişim Politikası</a>
+        </nav>
+        <p style="font-size:1.1rem; font-weight:700; letter-spacing:1px; margin-bottom: 18px;">&copy; 2025 GenZ</p>
+        <div id="about-box" class="about-fadein">
+            <div class="about-inner">
+                <div class="about-header">
+                    <span class="about-icon">&#8505;</span>
+                    <span class="about-title">Hakkımızda</span>
+                </div>
+                <div class="about-text">
+                    <p>GenZ, özgün tarzını yansıtmak isteyen yeni neslin ilham kaynağı olmak için yola çıktı. Takı, piercing, nail art ve saç aksesuarları gibi birçok kategoride özenle seçilmiş ürünlerimizle kendinizi ifade etmenizi kolaylaştırıyoruz.</p>
+                    <p>Her zevke hitap eden şık ve kaliteli ürünleri, ulaşılabilir fiyatlarla sunmayı hedefliyoruz. Müşteri memnuniyetini en ön planda tutuyor, her adımda güvenli alışveriş deneyimi yaşamanız için çalışıyoruz.</p>
+                    <p class="about-highlight">Siz de kendi stilinizi yaratmak ve modaya yön vermek istiyorsanız, GenZ ailesine katılın.<br>Tarz senin, seçim senin!</p>
+                </div>
+            </div>
+        </div>
+        <style>
+            .about-fadein {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 1px;
+                margin: 0 auto;
+                opacity: 0;
+                transform: translateY(40px);
+                transition: opacity 0.9s cubic-bezier(.4,2,.6,1), transform 0.9s cubic-bezier(.4,2,.6,1);
+                will-change: opacity, transform;
+            }
+            .about-fadein.visible {
+                opacity: 1;
+                transform: none;
+            }
+            .about-inner {
+                background: rgba(255,255,255,0.92);
+                box-shadow: 0 4px 32px 0 #e0c68d33, 0 2px 12px 0 #e0c68d22;
+                border-radius: 22px;
+                padding: 36px 38px 28px 38px;
+                max-width: 700px;
+                width: 95vw;
+                margin: 0 auto;
+            }
+            .about-header {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 18px;
+                gap: 12px;
+            }
+            .about-icon {
+                font-size: 2.2rem;
+                color: #e0c68d;
+                filter: drop-shadow(0 2px 8px #e0c68d44);
+                vertical-align: middle;
+            }
+            .about-title {
+                font-size: 2.1rem;
+                font-weight: 900;
+                color: #bfae7e;
+                letter-spacing: 2px;
+                font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+            }
+            .about-text p {
+                color: #7c6c5c;
+                font-size: 1.13rem;
+                line-height: 1.85;
+                margin: 0 0 16px 0;
+                font-weight: 500;
+                text-align: center;
+            }
+            .about-highlight {
+                color: #bfae7e;
+                font-weight: 700;
+                font-size: 1.13rem;
+                margin-top: 10px;
+            }
+            @media (max-width: 700px) {
+                .about-inner {
+                    padding: 22px 8vw 18px 8vw;
+                }
+                .about-title {
+                    font-size: 1.4rem;
+                }
+                .about-icon {
+                    font-size: 1.4rem;
+                }
+                .about-text p, .about-highlight {
+                    font-size: 1rem;
+                }
+            }
+            @media (max-width: 500px) {
+                .about-inner {
+                    padding: 16px 2vw 12px 2vw;
+                }
+                .about-title {
+                    font-size: 1.1rem;
+                }
+                .about-icon {
+                    font-size: 1.1rem;
+                }
+            }
+        </style>
+        <script>
+            // Fade-in animasyonu için Intersection Observer
+            document.addEventListener('DOMContentLoaded', function() {
+                var aboutBox = document.querySelector('.about-fadein');
+                if (!aboutBox) return;
+                var observer = new window.IntersectionObserver(function(entries) {
+                    entries.forEach(function(entry) {
+                        if (entry.isIntersecting) {
+                            aboutBox.classList.add('visible');
+                            observer.disconnect();
+                        }
+                    });
+                }, { threshold: 0.2 });
+                observer.observe(aboutBox);
+            });
+        </script>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="firebase-init.js"></script>
+    <script src="main.js"></script>
+    <script>
+    // Tüm Ürünler'e tıklanınca öne çıkan ürünler gizlensin, diğer kategorilerde tekrar gösterilsin
+    document.addEventListener('DOMContentLoaded', function() {
+        var allProductsLink = document.getElementById('all-products-link');
+        var featuredProducts = document.getElementById('featured-products');
+        var categoryLinks = document.querySelectorAll('.categories a');
+        if (allProductsLink && featuredProducts) {
+            allProductsLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                featuredProducts.style.display = 'none';
+            });
+        }
+        // Diğer kategorilere tıklanınca öne çıkanlar tekrar görünsün DEĞİL!
+        // Sadece Tüm Ürünler'e tıklanınca öne çıkanlar gösterilsin, diğer kategorilerde gizlensin
+        categoryLinks.forEach(function(link) {
+            if (link !== allProductsLink) {
+                link.addEventListener('click', function(e) {
+                    featuredProducts.style.display = 'none';
+                });
+            }
+        });
+    });
+    // Öne çıkan ürünleri Firestore'dan çek ve göster
+    async function renderFeaturedProducts() {
+        // Öne çıkan ürünleri belirle (örnek: en yüksek puanlı veya rastgele 4 ürün)
+        let allProducts = await db.collection('products').get();
+        let products = allProducts.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // Burada öne çıkan ürünleri seçme kriterini değiştirebilirsin
+        let featured = products.sort((a,b) => (b.rating||0)-(a.rating||0)).slice(0,4);
+        let grid = document.getElementById('featured-grid');
+        grid.innerHTML = '';
+        featured.forEach(product => {
+            let card = document.createElement('div');
+            card.className = 'featured-card'; // Sadece featured-card, product-card DEĞİL!
+            let stokDurum = product.stock > 0 ? `<span style='color:#bfae7e;'>Stok: ${product.stock}</span>` : `<span style='color:red;'>Tükendi</span>`;
+            let disabled = product.stock > 0 ? '' : 'disabled style="opacity:0.5;cursor:not-allowed;"';
+            card.innerHTML = `
+                <img src="${product.image}" alt="${product.name}">
+                <div class="featured-info">
+                    <h3>${product.name}</h3>
+                    <p>${product.description || ''}</p>
+                    <div style="margin-bottom:8px;">${stokDurum}</div>
+                    <button class="add-to-cart-btn" data-id="${product.id}" ${disabled}>Sepete Ekle</button>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+        // Sepete ekle butonları
+        grid.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+            btn.onclick = function() {
+                addToCart(this.getAttribute('data-id'));
+                showToast('Ürün sepete eklendi!');
+            };
+        });
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        renderFeaturedProducts();
+    });
+    </script>
+</body>
+</html>
